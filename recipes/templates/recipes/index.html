@@ -1,0 +1,230 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartChef — AI Recipe Generator</title>
+    <link rel="stylesheet" href="{% static 'recipes/style.css' %}">
+</head>
+<body>
+
+<div class="container">
+
+    <header>
+        <div class="logo">Smart<span>Chef</span></div>
+
+        <p>
+            {% if language == "kk" %}
+                Жасанды интеллект арқылы рецепт жасаңыз
+            {% else %}
+                Создавайте рецепты с помощью искусственного интеллекта
+            {% endif %}
+        </p>
+
+        <form method="POST" class="language-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="language">
+            <input type="hidden" name="products" value="{{ products }}">
+            <input type="hidden" name="minutes" value="{{ minutes }}">
+
+            {% if vegetarian %}
+                <input type="hidden" name="vegetarian" value="on">
+            {% endif %}
+
+            <button name="language" value="kk"
+                class="{% if language == 'kk' %}active{% endif %}">
+                Қазақша
+            </button>
+
+            <button name="language" value="ru"
+                class="{% if language == 'ru' %}active{% endif %}">
+                Русский
+            </button>
+        </form>
+    </header>
+
+    <main>
+        <section class="form-card">
+
+            <h1>
+                {% if language == "kk" %}
+                    Тоңазытқышта не бар?
+                {% else %}
+                    Что есть в холодильнике?
+                {% endif %}
+            </h1>
+
+            <p class="description">
+                {% if language == "kk" %}
+                    Қолда бар өнімдерді енгізіңіз. Біз сізге рецепт дайындаймыз.
+                {% else %}
+                    Введите имеющиеся продукты. Мы подберём для вас рецепт.
+                {% endif %}
+            </p>
+
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="generate">
+
+                <label for="products">
+                    {% if language == "kk" %}Өнімдер{% else %}Продукты{% endif %}
+                </label>
+
+                <textarea
+                    id="products"
+                    name="products"
+                    placeholder="{% if language == 'kk' %}Мысалы: картоп, жұмыртқа, ірімшік{% else %}Например: картофель, яйца, сыр{% endif %}"
+                    required
+                >{{ products }}</textarea>
+
+                <label for="minutes">
+                    {% if language == "kk" %}Дайындау уақыты{% else %}Время приготовления{% endif %}
+                </label>
+
+                <select id="minutes" name="minutes">
+                    <option value="15" {% if minutes == "15" %}selected{% endif %}>15 минут</option>
+                    <option value="30" {% if minutes == "30" %}selected{% endif %}>30 минут</option>
+                    <option value="60" {% if minutes == "60" %}selected{% endif %}>60 минут</option>
+                </select>
+
+                <label class="checkbox-label">
+                    <input
+                        type="checkbox"
+                        name="vegetarian"
+                        {% if vegetarian %}checked{% endif %}
+                    >
+
+                    {% if language == "kk" %}Етсіз режим{% else %}Без мяса{% endif %}
+                </label>
+
+                <button type="submit" class="generate-button">
+                    {% if language == "kk" %}Рецепт жасау{% else %}Создать рецепт{% endif %}
+                </button>
+            </form>
+
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+
+        </section>
+
+        {% if recipe %}
+            <section class="recipe-card">
+                <h2>
+                    {% if language == "kk" %}Сіздің рецептіңіз{% else %}Ваш рецепт{% endif %}
+                </h2>
+
+                <div class="recipe-content">{{ recipe|linebreaksbr }}</div>
+            </section>
+        {% endif %}
+
+
+<!-- МОИ РЕЦЕПТЫ -->
+<section class="saved-section">
+
+    <div class="section-heading">
+        <div>
+            <h2>
+                {% if language == "kk" %}Менің рецепттерім{% else %}Мои рецепты{% endif %}
+            </h2>
+            <p>
+                {% if language == "kk" %}Сіз жасаған рецепттер{% else %}Ваши рецепты{% endif %}
+            </p>
+        </div>
+        <span class="recipe-count">1</span>
+    </div>
+
+    <div class="saved-grid">
+
+        <article class="saved-recipe">
+            <div class="recipe-image omelette-image">
+                🍳
+            </div>
+
+            <div class="saved-recipe-content">
+                <span class="recipe-tag">15 минут</span>
+
+                <h3>
+                    {% if language == "kk" %}Ірімшік қосылған омлет{% else %}Омлет с сыром{% endif %}
+                </h3>
+
+                <p>
+                    {% if language == "kk" %}
+                        Жұмыртқа мен ірімшіктен жасалған жеңіл таңғы ас.
+                    {% else %}
+                        Простой и вкусный завтрак из яиц и сыра.
+                    {% endif %}
+                </p>
+
+                <div class="ingredients">
+                    <strong>{% if language == "kk" %}Құрамы:{% else %}Ингредиенты:{% endif %}</strong>
+                    <span>Яйца · Сыр · Молоко · Соль</span>
+                </div>
+            </div>
+        </article>
+
+    </div>
+</section>
+
+
+<!-- ЗАКЛАДКИ -->
+<section class="saved-section">
+
+    <div class="section-heading">
+        <div>
+            <h2>
+                {% if language == "kk" %}Таңдаулылар{% else %}Закладки{% endif %}
+            </h2>
+            <p>
+                {% if language == "kk" %}Сақталған рецепттер{% else %}Сохранённые рецепты{% endif %}
+            </p>
+        </div>
+
+        <span class="recipe-count">1</span>
+    </div>
+
+    <div class="saved-grid">
+
+        <article class="saved-recipe">
+            <div class="recipe-image potato-image">
+                🥘
+            </div>
+
+            <div class="saved-recipe-content">
+                <span class="recipe-tag">30 минут</span>
+
+                <h3>
+                    {% if language == "kk" %}Тауық еті қосылған картоп{% else %}Картофель с курицей{% endif %}
+                </h3>
+
+                <p>
+                    {% if language == "kk" %}
+                        Тауық еті мен көкөністер қосылған дәмді кешкі ас.
+                    {% else %}
+                        Сытный ужин с курицей и овощами на сковороде.
+                    {% endif %}
+                </p>
+
+                <div class="ingredients">
+                    <strong>{% if language == "kk" %}Құрамы:{% else %}Ингредиенты:{% endif %}</strong>
+                    <span>Картофель · Курица · Лук · Морковь</span>
+                </div>
+            </div>
+        </article>
+
+    </div>
+</section>
+
+
+    </main>
+
+    <footer>
+        SmartChef © 2026 · Powered by Gemini AI
+    </footer>
+
+</div>
+
+</body>
+</html>
